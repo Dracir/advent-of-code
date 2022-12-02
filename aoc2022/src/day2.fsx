@@ -40,6 +40,6 @@ let fromStringToTuple (str: string) : char * char =
     let strArray = str.Split(" ")
     (strArray.[0].ToCharArray().[0], strArray.[1].ToCharArray().[0])
 
-let inputToMoves = inputs |> Seq.map (fromStringToTuple)
+let inputToMoves = inputs |> Seq.map fromStringToTuple
 inputToMoves |> Seq.map (strategy1) |> Seq.sum |> printfn "Strategy 1: %d"
 inputToMoves |> Seq.map (strategy2) |> Seq.sum |> printfn "Strategy 2: %d"
