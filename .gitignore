@@ -1,2 +1,3 @@
-2022/obj
-2022/bin
+**/bin
+**/obj
+**/BenchmarkDotNet.Artifacts

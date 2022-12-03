@@ -4,9 +4,40 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "echo",
-			"type": "shell",
-			"command": "echo Hello"
+			"label": "build",
+			"command": "dotnet",
+			"type": "process",
+			"args": [
+				"build",
+				"${workspaceFolder}/aoc2022/Day2cs/Day2cs.csproj",
+				"/property:GenerateFullPaths=true",
+				"/consoleloggerparameters:NoSummary"
+			],
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "publish",
+			"command": "dotnet",
+			"type": "process",
+			"args": [
+				"publish",
+				"${workspaceFolder}/aoc2022/Day2cs/Day2cs.csproj",
+				"/property:GenerateFullPaths=true",
+				"/consoleloggerparameters:NoSummary"
+			],
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "watch",
+			"command": "dotnet",
+			"type": "process",
+			"args": [
+				"watch",
+				"run",
+				"--project",
+				"${workspaceFolder}/aoc2022/Day2cs/Day2cs.csproj"
+			],
+			"problemMatcher": "$msCompile"
 		}
 	]
 }

@@ -10,7 +10,7 @@ Set ~/.bashsrc variables
 nano ~/.bashsrc
 
     Add the variable to the bottom of the file:
-        export RSTUDIO_PANDOC=/usr/lib/rstudio/bin/pandoc
+        export AOC_SESSION=________________________________________________
     Save and close nano.
     Apply changes by:
 
