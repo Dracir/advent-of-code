@@ -1,4 +1,4 @@
-printfn "Hello from F#"
+printfn "Hello Day 2"
 
 // let inputs = System.IO.File.ReadLines("inputs/day2-exemple1.txt")
 let inputs = System.IO.File.ReadLines("inputs/day2-input.txt")
