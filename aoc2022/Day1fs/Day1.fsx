@@ -9,6 +9,8 @@ let calories =
     |> Array.map (fun x -> x |> Array.map (fun y -> int y))
     |> Array.map (fun x -> x |> Array.sum)
 
+
+
 let maxColories = calories |> Array.max
 
 let topThree = calories |> Array.sortDescending |> Array.take 3 |> Array.sum
