@@ -1,5 +1,4 @@
 **/bin
 **/obj
 **/BenchmarkDotNet.Artifacts
-aoc2022/day1rs/target
-aoc2022/day4rs/target
+aoc2022/day*rs/target

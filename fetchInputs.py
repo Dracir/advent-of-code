@@ -7,10 +7,12 @@ if len(sys.argv) != 3:
     print("Usage: python fetchInputs.py year day")
     exit(1)
 
+
 year = sys.argv[1]
 day = sys.argv[2]
+baseFolder = "aoc{year}".format(year=year)
 
-file = "inputs/day{day}-input.txt".format(day=day)
+file = "{baseFolder}/inputs/day{day}-input.txt".format(baseFolder=baseFolder, day=day)
 
 
 def fetchPersonalInput(session, year, day):
@@ -28,10 +30,10 @@ def fetchPersonalInput(session, year, day):
 
 
 def getExemples(session, year, day):
-    if not os.path.exists("examples"):
-        os.mkdir("examples".format(day=day))
-    if not os.path.exists("examples/day{day}".format(day=day)):
-        os.mkdir("examples/day{day}".format(day=day))
+    if not os.path.exists("{baseFolder}/examples".format(baseFolder=baseFolder)):
+        os.mkdir("{baseFolder}/examples".format(baseFolder=baseFolder))
+    if not os.path.exists("{baseFolder}/examples/day{day}".format(baseFolder=baseFolder, day=day)):
+        os.mkdir("{baseFolder}/examples/day{day}".format(baseFolder=baseFolder,day=day))
 
     url = "https://adventofcode.com/{year}/day/{day}".format(year=year,
                                                              day=day)
@@ -47,7 +49,7 @@ def getExemples(session, year, day):
     i = 0
     codeSections = soup.find_all('code')
     for code in codeSections:
-        codePath = "examples/day{day}/example{i}.txt".format(day=day, i=i)
+        codePath = "{baseFolder}/examples/day{day}/example{i}.txt".format(baseFolder=baseFolder, day=day, i=i)
         i += 1
         with open(codePath, "w") as f:
             f.write(code.text.strip())
