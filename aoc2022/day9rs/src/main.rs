@@ -1,3 +1,8 @@
+use core::time;
+use std::thread;
+
+use termion::{color, terminal_size};
+
 #[derive(Eq, Hash, PartialEq, Clone, Copy)]
 struct Position {
     x: i32,
@@ -56,6 +61,22 @@ fn tail_follow(head: &Position, tail: &Position) -> Position {
         return tail.clone();
     }
     return match (x_diff, y_diff) {
+        (2, 2) => Position {
+            x: tail.x + 1,
+            y: tail.y + 1,
+        },
+        (2, -2) => Position {
+            x: tail.x + 1,
+            y: tail.y - 1,
+        },
+        (-2, 2) => Position {
+            x: tail.x - 1,
+            y: tail.y + 1,
+        },
+        (-2, -2) => Position {
+            x: tail.x - 1,
+            y: tail.y - 1,
+        },
         //Simple Horizontal
         (2, _) => Position {
             x: tail.x + 1,
@@ -74,65 +95,87 @@ fn tail_follow(head: &Position, tail: &Position) -> Position {
             x: head.x,
             y: tail.y - 1,
         },
-        // //Far ?
-        // (3, _) => Position {
-        //     x: tail.x + 1,
-        //     y: head.y,
-        // },
-        // (-3, _) => Position {
-        //     x: tail.x - 1,
-        //     y: head.y,
-        // },
-        // //Simple Vertical
-        // (_, 3) => Position {
-        //     x: head.x,
-        //     y: tail.y + 1,
-        // },
-        // (_, -3) => Position {
-        //     x: head.x,
-        //     y: tail.y - 1,
-        // },
         _ => {
             panic!("Unknown case : {:?}", (x_diff, y_diff))
         }
     };
 }
 
-fn print_rope(rope: &Vec<Position>) {
-    let most_left = rope.iter().min_by_key(|p| p.x).unwrap().x;
-    let most_bottom = rope.iter().min_by_key(|p| p.y).unwrap().y;
-    let most_right = rope.iter().max_by_key(|p| p.x).unwrap().x;
-    let most_top = rope.iter().max_by_key(|p| p.y).unwrap().y;
+fn print_grid(screen_size: (usize, usize), viewport_offset: (usize, usize)) {
+    print!("{}", color::Fg(color::Rgb(55, 55, 55)));
+    for y in 0..screen_size.1 {
+        println!(
+            "{}{}",
+            termion::cursor::Goto(1, (y + 1).try_into().unwrap()),
+            ".".repeat(screen_size.0 as usize)
+        );
+    }
 
-    let mut grid = vec![
-        vec![' '; (most_right - most_left + 1) as usize];
-        (most_top - most_bottom + 1) as usize
-    ];
+    // println!("viewport_offset:{:?}", viewport_offset);
+    let x_offset = 1 + ((10 - viewport_offset.0 % 10) % 10) as i32;
+    let y_offset = 1 + ((10 - viewport_offset.1 % 10) % 10) as i32;
+    // println!("x:{},y:{}", x_offset, y_offset);
+    print!("{}", color::Fg(color::LightWhite));
+    for x in (x_offset..screen_size.0 as i32).step_by(10) {
+        for y in (y_offset..screen_size.1 as i32).step_by(10) {
+            println!("{}{}", termion::cursor::Goto(x as u16, y as u16), "+");
+        }
+    }
+}
+#[allow(dead_code)]
+fn print_rope(rope: &Vec<Position>, screen_size: (usize, usize), viewport_offset: (usize, usize)) {
+    let height = screen_size.1 - 1;
 
-    for position in rope {
-        grid[(position.y - most_bottom) as usize][(position.x - most_left) as usize] = 'X';
+    for i in 0..rope.len() {
+        let beau_character = char::from_u32(48 + i as u32).unwrap();
+        let x = (rope[i].x + viewport_offset.0 as i32) as u16;
+        let y = (height as i32 - rope[i].y - viewport_offset.1 as i32) as u16;
+        println!(
+            "{}{}{}",
+            termion::cursor::Goto(x, y),
+            color::Fg(color::Rgb(255, (i * 25) as u8, 0)),
+            beau_character
+        );
     }
 }
 
 fn part2(input: &String, rope_length: usize) {
+    print!("{}", termion::clear::All);
+    print!("{}", termion::cursor::Hide);
+
     let mut rope: Vec<Position> = Vec::new();
     for _ in 0..rope_length {
         rope.push(Position { x: 0, y: 0 });
     }
 
-    let mut position_visited_by_last_tail: std::collections::HashMap<Position, i32> =
-        std::collections::HashMap::new();
+    let mut position_visited_by_last_tail = std::collections::HashMap::new();
+    let size = terminal_size().unwrap();
+    let size = (size.0 as usize, (size.1 - 1) as usize);
+    let viewport_offset = (size.0 / 2, size.1 / 2);
 
     for line in input.lines() {
         let splited = line.split(" ").collect::<Vec<&str>>();
         let direction = splited[0];
         let distance = splited[1].parse::<i32>().unwrap();
 
-        println!("Direction : {:?} Distance : {:?}", direction, distance);
+        // println!("Direction : {:?} Distance : {:?}", direction, distance);
+        print_grid(size, viewport_offset);
+        print_rope(&rope, size, viewport_offset);
+        thread::sleep(time::Duration::from_millis(10));
+
         for _ in 0..distance {
+            // println!("{} / {} ", i, distance);
             rope[0] = move_direction(direction, &rope[0]);
+            print_rope(&rope, size, viewport_offset);
+            thread::sleep(time::Duration::from_millis(1));
+
+            // print_rope(&rope);
+            // println!("lets go les ropes !");
             for i in 1..rope.len() {
+                // println!("Rope {} ", i);
                 rope[i] = tail_follow(&rope[i - 1], &rope[i]);
+                print_rope(&rope, size, viewport_offset);
+                thread::sleep(time::Duration::from_millis(1));
             }
 
             // if position_visite contains tailPosition
@@ -146,33 +189,6 @@ fn part2(input: &String, rope_length: usize) {
             }
         }
     }
+    print!("{}", termion::cursor::Show);
     println!("UniqueVisited : {:?}", position_visited_by_last_tail.len());
-}
-
-fn part1(input: &String) {
-    let mut head_position = Position { x: 0, y: 0 };
-    let mut tail_position = Position { x: 0, y: 0 };
-    let mut position_visites: std::collections::HashMap<Position, i32> =
-        std::collections::HashMap::new();
-    position_visites.insert(Position { x: 0, y: 0 }, 1);
-
-    for line in input.lines() {
-        let splited = line.split(" ").collect::<Vec<&str>>();
-        let direction = splited[0];
-        let distance = splited[1].parse::<i32>().unwrap();
-
-        for _ in 0..distance {
-            head_position = move_direction(direction, &head_position);
-            tail_position = tail_follow(&head_position, &tail_position);
-
-            // if position_visite contains tailPosition
-            if !position_visites.contains_key(&tail_position) {
-                position_visites.insert(tail_position, 1);
-            } else {
-                let value = position_visites.get(&tail_position).unwrap();
-                position_visites.insert(tail_position, value + 1);
-            }
-        }
-    }
-    println!("UniqueVisited : {:?}", position_visites.len());
 }
