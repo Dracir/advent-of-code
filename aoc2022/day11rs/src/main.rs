@@ -112,10 +112,10 @@ fn play_round(monkeys: &mut Vec<Monkey>, worry_level_division: u64) {
 }
 fn main() {
     println!("Hello Day 11 - Monkey in the Middle!");
-    let path = "../inputs/day11/example1.txt";
-    // let path = "../inputs/day11/me.txt";
+    // let path = "../inputs/day11/example1.txt";
+    let path = "../inputs/day11/me.txt";
 
-    part1(path);
+    // part1(path);
     part2(path);
 }
 
@@ -142,11 +142,19 @@ fn part1(path: &str) {
 fn part2(path: &str) {
     let mut monkeys = Vec::<Monkey>::new();
     parse_to_monkeys(path, &mut monkeys);
-    for round in 0..20 {
-        println!("Round {}", round);
+    let factor: u64 = monkeys.iter().map(|x| x.test_divisible).product();
+    println!("Factor: {}", factor);
+    for round in 0..10000 {
+        // println!("Round {}", round);
         play_round(&mut monkeys, 1);
-        print_monkey_items(&monkeys);
-        println!("---");
+        // print_monkey_items(&monkeys);
+        // println!("---");
+
+        for monkey in &mut monkeys {
+            for item in &mut monkey.items {
+                *item = *item % factor;
+            }
+        }
     }
     for i in 0..monkeys.len() {
         println!(
